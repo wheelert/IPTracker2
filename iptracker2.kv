@@ -1,0 +1,271 @@
+#:kivy 1.0.9
+
+<SelectableLabel>:
+    # Draw a background to indicate selection
+    canvas.before:
+        Color:
+            rgba: (0.4, 0.4, 0.4, 1) if self.selected else (0.5, 0.5, 0.5, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+<TrackerLayout>:
+
+	canvas:
+		Color:
+			rgba: 0.3, 0.3, 0.3, 1
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	rv: rv
+	rv2: rv2
+	orientation: "vertical"
+	padding: 2
+	spacing: 0
+	rows: 3
+	
+	ActionBar:
+		pos_hint: {'top':1}
+		ActionView:
+			use_separator: True
+			ActionPrevious:
+				title: 'IPTracker'
+				with_previous: False
+			ActionButton:
+				text: 'Add Subnet'
+				on_press: root.addSubnet()
+			ActionButton:
+				text: 'Remove Subnet'
+				on_press: root.removeSubnet()
+			ActionGroup:
+				text: 'Actions' 
+				mode: 'spinner'
+				ActionButton:
+					text: 'Scan'
+					on_press: root.scanCall()
+				ActionButton:
+					text: 'Export'
+				ActionButton:
+					text: 'Settings'
+					on_release: root.settingsdlg()
+					
+				
+	GridLayout:
+		cols: 2
+		Splitter:
+			sizable_from: 'right'
+			default_size_hint: 1, None
+			size_hint: 0.3, 1.0
+			RecycleView:
+				id: rv
+				scroll_type: ['bars', 'content']
+				scroll_wheel_distance: dp(114)
+				bar_width: dp(5)
+				viewclass: 'SelectableLabel'
+				#size: 200, root.height - 70
+				
+				SelectableRecycleBoxLayout:
+					default_size: 200, dp(56)
+					default_size_hint: 1, None
+					size_hint_y: None
+					height: self.minimum_height
+					orientation: 'vertical'
+					#multiselect: True
+					#touch_multiselect: True
+					
+		GridLayout:
+			cols: 1
+			BoxLayout:
+				id: tblhead
+				size_hint_y: None
+				height: 20
+				Label:
+					text:"[b]IP[/b]"
+					markup: True
+				Label:
+					text:"[b]Status[/b]"
+					markup: True
+				Label:
+					text:"[b]Hostname[/b]"
+					markup: True
+				Label:
+					text:"[b]Note[/b]"
+					markup: True
+			Widget:
+				id: tblseparator
+				size_hint_y: None
+				height: 2
+				canvas:
+					Color:
+						rgb: 153, 153, 153
+					Rectangle:
+						pos: self.pos
+						size: self.size
+				
+			RecycleView:
+				id: rv2
+				scroll_type: ['bars', 'content']
+				scroll_wheel_distance: dp(114)
+				bar_width: dp(10)
+				viewclass: 'RecycleViewRow'
+				#size_hint: None, None
+				#size: 200, root.height - 70
+				SelectableRecycleBoxLayout:
+					default_size: 200, dp(56)
+					default_size_hint: 1, None
+					size_hint_y: None
+					height: self.minimum_height
+					orientation: 'vertical'
+					#multiselect: True
+					#touch_multiselect: True
+			
+<settingspop>
+	id: settingsPop
+	GridLayout
+		cols: 1
+		padding: 10
+		title: "IPTracker Settings"
+		
+		GridLayout:
+			cols: 2
+			Label: 
+				text: "Database File"
+			TextInput:
+				multiline: False
+		Button:
+			text: "Close"
+			on_press: settingsPop.dismiss()
+			
+<addsubnetpop>
+	id: addSubnetPop
+	title: "Add Subnet"
+
+	GridLayout
+		cols: 1
+		padding: 10
+		
+		GridLayout:
+			cols: 2
+			row_force_default: True
+			row_default_height: 40
+			Label: 
+				text: "Name"
+			TextInput:
+				id: new_name
+				multiline: False
+				
+			Label: 
+				text: "Network"
+			TextInput:
+				id: new_network
+				multiline: False
+				
+			Label: 
+				text: "Mask"
+			TextInput:
+				id: new_mask
+				multiline: False
+				
+			Label
+				text: ""
+			Label
+				text: ""
+			Button:
+				text: "Close"
+				on_press: addSubnetPop.dismiss()
+				
+			Button:
+				text: "Add"
+				on_press: addSubnetPop.createsub()
+				id: addbtn
+
+<removesubnetpop>
+	on_open:
+		rmessage.text = "Are you sure you want to remove " + root._subname + "?"
+		
+	id: removeSubnetPop
+	title: "Remove Subnet"
+
+	GridLayout
+		cols: 1
+		padding: 10
+		Label: 
+			id: rmessage
+			text: root.status
+		GridLayout:
+			cols: 2
+			row_force_default: True
+			row_default_height: 40
+			Button:
+				text: "Close"
+				on_press: removeSubnetPop.dismiss()
+				
+			Button:
+				text: "Remove"
+				on_press: removeSubnetPop.removesub()
+				id: addbtn
+				
+<RecycleViewRow>:
+		# Draw a background to indicate selection
+	canvas.before:
+		Color:
+			rgba: (0.5, 0.5, 0.5, 1) if self.selected else (0.4, 0.4, 0.4, 1)
+		Rectangle:
+			pos: self.pos
+			size: self.size
+	orientation: 'horizontal'
+	GridLayout:
+		cols: 4
+		Label:
+			text: root.ip
+		Label:
+			text: root.status
+		Label:
+			text: root.hostname
+		TextInput: 
+			text: root.note
+			on_focus: root.note_update(self)
+			on_text: root.note_write(self.text)
+		Widget:
+			id: tblseparator
+			size_hint_y: None
+			height: 0.5
+			canvas:
+				Color:
+					rgb: 153, 153, 153
+				Rectangle:
+					pos: self.pos
+					size: self.size
+		Widget:
+			id: tblseparator
+			size_hint_y: None
+			height: 0.5
+			canvas:
+				Color:
+					rgb: 153, 153, 153
+				Rectangle:
+					pos: self.pos
+					size: self.size
+		Widget:
+			id: tblseparator
+			size_hint_y: None
+			height: 0.5
+			canvas:
+				Color:
+					rgb: 153, 153, 153
+				Rectangle:
+					pos: self.pos
+					size: self.size			
+		Widget:
+			id: tblseparator
+			size_hint_y: None
+			height: 0.5
+			canvas:
+				Color:
+					rgb: 153, 153, 153
+				Rectangle:
+					pos: self.pos
+					size: self.size			
+			
+			
+			
+			
