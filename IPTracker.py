@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.0.6') # replace with your current kivy version !
+kivy.require('1.0.6') 
 from kivy.uix.widget import Widget
 from kivy.app import App
 from kivy.properties import ObjectProperty, ListProperty, StringProperty, BooleanProperty
@@ -16,6 +16,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from IPTrackerData import IPTrackerData
 from threading import Thread 
+import configparser
 
 ''' for table like recycleview for ips'''
 class RecycleViewRow(RecycleDataViewBehavior, BoxLayout):
@@ -136,7 +137,11 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 			print("selection for {0}".format(rv.data[index]))
 			
 class settingsPop(Popup):
-	new_mask = StringProperty()
+	db_file = StringProperty()
+	#need to add check that file exists in main
+	config = configparser.ConfigParser()
+	config.read('tracker.cfg')
+	
 	def closePop(self):
 		self.close()
 		

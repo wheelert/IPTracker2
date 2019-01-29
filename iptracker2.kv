@@ -120,20 +120,34 @@
 			
 <settingspop>
 	id: settingsPop
+	title: "IPTracker Settings"
 	GridLayout
 		cols: 1
 		padding: 10
-		title: "IPTracker Settings"
 		
 		GridLayout:
 			cols: 2
+			size_hint_y: None
 			Label: 
 				text: "Database File"
+				height: 40
+				font_size: 25
+				size_hint_y: None
+				halign: "right"
+				
 			TextInput:
 				multiline: False
+				id: db_file
+				height: 40
+				font_size: 25
+				size_hint_y: None
+				halign: "left"
 		Button:
 			text: "Close"
+			size_hint_y: None
+			height: 40
 			on_press: settingsPop.dismiss()
+			
 			
 <addsubnetpop>
 	id: addSubnetPop
