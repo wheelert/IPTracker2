@@ -18,6 +18,17 @@ from IPTrackerData import IPTrackerData
 from threading import Thread 
 import configparser
 
+
+class RecycleView():
+	def refresh_from_data(self, force=True):
+		"""The data has changed, update the RecycleView internals
+		"""
+		print("refresh data")
+		if force:
+			self.dirty_views.update(self.views)
+		self.compute_views_heights()
+		self.compute_visible_views()
+		
 ''' for table like recycleview for ips'''
 class RecycleViewRow(RecycleDataViewBehavior, BoxLayout):
 	text = StringProperty()  
@@ -66,6 +77,16 @@ class RecycleViewRow(RecycleDataViewBehavior, BoxLayout):
 		_ipdata = (val,_ip,_subnetid)
 		Data.update_ip_note(_ipdata)
 		print(" updated: "+str(_ip)+" index"+str(self._id)+" text:"+val)
+		
+		
+	def refresh_from_data(self, force=True):
+		"""The data has changed, update the RecycleView internals
+		"""
+		print("refresh data")
+		if force:
+			self.dirty_views.update(self.views)
+		self.compute_views_heights()
+		self.compute_visible_views()
 	
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior, RecycleBoxLayout):
 #Adds selection and focus behaviour to the view. '''
@@ -138,7 +159,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 			
 class settingsPop(Popup):
 	db_file = StringProperty()
-	#need to add check that file exists in main
+	#add check that file exists in main
 	config = configparser.ConfigParser()
 	config.read('tracker.cfg')
 	
@@ -294,15 +315,40 @@ class TrackerLayout(BoxLayout):
 		
 		# Get return code from process
 		ret = p.stdout.read()
+		
 		if _sub in str(ret):
 			return True
 		else:
 			return False
 			
+	def repoprv(self):
+		
+		_subname = str(rv.data[_navindex]['text'])
+			
+		Data = IPTrackerData()
+		
+		_subnetid = Data.get_subnet_id(_subname)
+		tblData = Data.get_ips(_subnetid)
+		_data = []
+		
+		for _item in tblData:
+			_ip = _item[0]
+			_status = str(_item[1])
+			_hostname = str(_item[2])
+			_notes = _item[3]
+			if _notes is None:
+				_notes = ""
+				
+			_data.append({'ip':_ip, 'status':_status,'hostname':_hostname,'note':_notes})
+		rv2.data = _data
+		rv2.refresh_from_data()
+			
 	def ipscan(self, _subnetid):
 		import socket 
 		
 		print("Scanning:"+str(_subnetid))
+		
+		self.repoprv()
 		
 		Data = IPTrackerData()
 		_ips = Data.get_ips(_subnetid)
@@ -325,6 +371,7 @@ class TrackerLayout(BoxLayout):
 				_hostname = ""
 				
 			_data = (_hostname,_ip[0],_subnetid)
+			print(_data)
 			Data.update_ip_hostname(_data)
 		
 	def scanCall(self):
