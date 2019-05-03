@@ -16,8 +16,7 @@
 		Rectangle:
 			size: self.size
 			pos: self.pos
-	rv: rv
-	rv2: rv2
+			
 	orientation: "vertical"
 	padding: 2
 	spacing: 0
@@ -46,9 +45,31 @@
 					text: 'Export'
 				ActionButton:
 					text: 'Settings'
-					on_release: root.settingsdlg()
+					on_release: app.root.settingsdlg()
 					
-				
+	ScreenManager:
+		id: screen_manager
+		StartScreen:
+			name: "start_screen"
+			id: start_screen
+		settingspop:
+			name: "settingspop"
+			id: settingspop
+
+<StartScreen@Screen>:
+	canvas:
+		Color:
+			rgba: 0.3, 0.3, 0.3, 1
+		Rectangle:
+			size: self.size
+			pos: self.pos
+	rv: rv
+	rv2: rv2
+	orientation: "vertical"
+	padding: 2
+	spacing: 0
+	rows: 3
+	
 	GridLayout:
 		cols: 2
 		Splitter:
@@ -118,7 +139,7 @@
 					#multiselect: True
 					#touch_multiselect: True
 			
-<settingspop>
+<settingspop@Screen>
 	id: settingsPop
 	title: "IPTracker Settings"
 	GridLayout
@@ -146,7 +167,7 @@
 			text: "Close"
 			size_hint_y: None
 			height: 40
-			on_press: settingsPop.dismiss()
+			on_press: app.root.settingsdlg_close()
 			
 			
 <addsubnetpop>

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import kivy
 kivy.require('1.0.6') 
 from kivy.uix.widget import Widget
@@ -62,8 +63,8 @@ class RecycleViewRow(RecycleDataViewBehavior, BoxLayout):
 		_selindex = index
 		_ip = str(rv.data[index]['ip'])
 		
-		if is_selected:
-			print("selected: "+ str(index)+" - "+ str(_ip))
+		#if is_selected:
+			#print("selected: "+ str(index)+" - "+ str(_ip))
 		
 	def note_update(self, txt):
 		print("focus: "+str(self._id))
@@ -131,7 +132,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 			
 			print("selection changed to {0}".format(rv.data[index]))
 			_subname = str(rv.data[index]['text'])
-			print("pop ips"+str(_subname))
+			
 			Data = IPTrackerData()
 			global _subnetid
 			
@@ -150,21 +151,13 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 				_data.append({'ip':_ip, 'status':_status,'hostname':_hostname,'note':_notes})
 			
 			global rv2
-			#rv2.data = [{'text2': 'text2', 'text': 'Button 0', 'id': '0'}, {'text2': 'text2', 'text': 'Button 1', 'id': '1'}, {'text2': 'text2', 'text': 'Button 2', 'id': '2'}]
 			rv2.data = _data
 			
 			
 		else:
-			print("selection for {0}".format(rv.data[index]))
+			pass
+			#print("selection for {0}".format(rv.data[index]))
 			
-class settingsPop(Popup):
-	db_file = StringProperty()
-	#add check that file exists in main
-	config = configparser.ConfigParser()
-	config.read('tracker.cfg')
-	
-	def closePop(self):
-		self.close()
 		
 class addSubnetPop(Popup):
 
@@ -243,25 +236,38 @@ class TrackerLayout(BoxLayout):
 	
 	def popNav(self):
 	
-		_tblsep = self.ids.tblseparator
-		_tblsep.pos = self.ids.rv.width,0
+		_tblsep = self.ids.screen_manager.get_screen("start_screen").ids.tblseparator
+		_tblsep.pos = self.ids.screen_manager.get_screen("start_screen").ids.rv.width,0
 		
 		Data = IPTrackerData()
 		global rv
-		rv = self.ids.rv
+		rv = self.ids.screen_manager.get_screen("start_screen").ids.rv
 		nav_items = Data.subnets
-		self.rv.data = [{'text': str(x)} for x in nav_items]
+		rv.data = [{'text': str(x)} for x in nav_items]
 		
 		global rv2
-		rv2 = self.rv2 
+		rv2 = self.ids.screen_manager.get_screen("start_screen").ids.rv2
 		
 	def menuSel(self):
-		print("selected")
+		#print("selected")
+		pass
 		
 	def settingsdlg(self):
 
-		spop = settingsPop()
-		spop.open()   
+		#this should be updated to use Kivy settings panel in the future
+		app_ref = App.get_running_app()
+		_ids = app_ref.root.ids
+		self.ids.screen_manager.current = "settingspop"
+		
+		
+		db_file = StringProperty()
+		#add check that file exists in main
+		config = configparser.ConfigParser()
+		config.read('tracker.cfg')
+		
+	def settingsdlg_close(self):
+		self.ids.screen_manager.current = "start_screen"
+		
 		
 	def addSubnet(self):
 		addSubnet = addSubnetPop()
@@ -281,8 +287,6 @@ class TrackerLayout(BoxLayout):
 		nav_items = Data.subnets
 		self.rv.data = [{'text': str(x)} for x in nav_items]
 		
-	def test(self):
-		print("test")
 		
 	def fping(self, address):
 		import os
