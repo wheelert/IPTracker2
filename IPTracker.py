@@ -3,7 +3,7 @@ import kivy
 kivy.require('1.0.6') 
 from kivy.uix.widget import Widget
 from kivy.app import App
-from kivy.properties import ObjectProperty, ListProperty, StringProperty, BooleanProperty
+from kivy.properties import ObjectProperty, ListProperty, StringProperty, BooleanProperty, NumericProperty
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.recycleview import RecycleView
@@ -74,10 +74,12 @@ class RecycleViewRow(RecycleDataViewBehavior, BoxLayout):
 		_ip = str(self.ip)
 		global _subnetid
 		global _selindex
-		Data = IPTrackerData()
-		_ipdata = (val,_ip,_subnetid)
-		Data.update_ip_note(_ipdata)
-		print(" updated: "+str(_ip)+" index"+str(self._id)+" text:"+val)
+		
+		if _subnetid != 0:
+			Data = IPTrackerData()
+			_ipdata = (val,_ip,_subnetid)
+			Data.update_ip_note(_ipdata)
+			print(" updated: "+str(_ip)+" index"+str(self._id)+" text:"+val)
 		
 		
 	def refresh_from_data(self, force=True):
@@ -227,6 +229,12 @@ class removeSubnetPop(Popup):
 		
 class TrackerLayout(BoxLayout):
 	text = StringProperty()
+	#subnetid
+	global _subnetid
+	_subnetid = NumericProperty(20)
+	_subnetid = 0
+
+		
 	def __init__(self, **kwargs):
 		super(TrackerLayout, self).__init__(**kwargs)
 		
@@ -247,6 +255,7 @@ class TrackerLayout(BoxLayout):
 		
 		global rv2
 		rv2 = self.ids.screen_manager.get_screen("start_screen").ids.rv2
+		
 		
 	def menuSel(self):
 		#print("selected")
@@ -380,9 +389,11 @@ class TrackerLayout(BoxLayout):
 		
 	def scanCall(self):
 		global _subnetid
-		t = Thread(target=self.ipscan, args=( _subnetid, ))
-		t.setDaemon(True) #set to exit with main thread
-		t.start()
+		
+		if _subnetid != 0:
+			t = Thread(target=self.ipscan, args=( _subnetid, ))
+			t.setDaemon(True) #set to exit with main thread
+			t.start()
 	
 class IPTracker2(App):
 
