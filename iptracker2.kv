@@ -31,11 +31,15 @@
 				title: 'IPTracker'
 				with_previous: False
 			ActionButton:
+				text: ''
+				id: scanstatus
+					
+			ActionButton:
 				text: 'Add Subnet'
-				on_press: root.addSubnet()
+				on_press: app.root.addSubnet()
 			ActionButton:
 				text: 'Remove Subnet'
-				on_press: root.removeSubnet()
+				on_press: app.root.removeSubnet()
 			ActionGroup:
 				text: 'Actions' 
 				mode: 'spinner'
@@ -56,6 +60,14 @@
 		settingspop:
 			name: "settingspop"
 			id: settingspop
+			
+		addsubnetpop:
+			name: "addsubnetpop"
+			id: addsubnetpop
+			
+		removesubnetpop:
+			name: "removesubnetpop"
+			id: removesubnetpop
 
 <StartScreen@Screen>:
 	canvas:
@@ -171,8 +183,8 @@
 			on_press: app.root.settingsdlg_close()
 			
 			
-<addsubnetpop>
-	id: addSubnetPop
+<addsubnetpop@Screen>
+	id: addsubnetpop
 	title: "Add Subnet"
 
 	GridLayout
@@ -207,18 +219,15 @@
 				text: ""
 			Button:
 				text: "Close"
-				on_press: addSubnetPop.dismiss()
+				on_press: app.root.addsubnetpop_close()
 				
 			Button:
 				text: "Add"
-				on_press: addSubnetPop.createsub()
+				on_press: app.root.CreateSubnet()
 				id: addbtn
 
-<removesubnetpop>
-	on_open:
-		rmessage.text = "Are you sure you want to remove " + root._subname + "?"
-		
-	id: removeSubnetPop
+<removesubnetpop@Screen>
+	id: removesubnetpop
 	title: "Remove Subnet"
 
 	GridLayout
@@ -226,18 +235,18 @@
 		padding: 10
 		Label: 
 			id: rmessage
-			text: root.status
+			text: ""
 		GridLayout:
 			cols: 2
 			row_force_default: True
 			row_default_height: 40
 			Button:
-				text: "Close"
-				on_press: removeSubnetPop.dismiss()
+				text: "No"
+				on_press: app.root.removesubnetconf_dismiss()
 				
 			Button:
 				text: "Remove"
-				on_press: removeSubnetPop.removesub()
+				on_press: app.root.removesubnetdata()
 				id: addbtn
 				
 <RecycleViewRow>:

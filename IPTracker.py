@@ -161,71 +161,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 			#print("selection for {0}".format(rv.data[index]))
 			
 		
-class addSubnetPop(Popup):
-
-	def createsub(self):
-		new_network = self.ids.new_network.text
-		new_mask = self.ids.new_mask.text
-		new_name = self.ids.new_name.text
-		btn = self.ids.addbtn
-		_image = Image(source="loading.gif")
-		btn.add_widget(_image)
-		
-		Data = IPTrackerData()
-		data = (new_name,new_network,new_mask)
-		id = Data.create_subnet(data)
-		
-		ipdata = (id,new_network,new_mask)
-		t = Thread(target=self.createIps, args=( ipdata, ))
-		t.setDaemon(True) #set to exit with main thread
-		t.start()
-		
-		
-		
-		#refresh nav list
-		Data2 = IPTrackerData()
-		global rv
-		rv.layout_manager.clear_selection()
-		nav_items = Data2.subnets
-		rv.data = [{'text': str(x)} for x in nav_items]
-		rv.refresh_from_data()
-		
-		
-		
-		self.dismiss()
-
-	def createIps(self, ipdata):
-		Data = IPTrackerData()
-		Data.create_ips(ipdata)
-		
-		
-class removeSubnetPop(Popup):
-	_subname = ""
-	status = StringProperty()
-		
-	
-	def removesub(self):
-		self.ids.rmessage.text = "test"
-		self.status = "Are you sure you want to remove"+self._subname
-		if '_subnetid' in globals():
-			global _subnetid
-			
-			#remove subnet form database
-			Data = IPTrackerData()
-			Data.remove_subnet(_subnetid)
-			
-			#refresh nav list
-			Data2 = IPTrackerData()
-			global rv
-			rv.layout_manager.clear_selection()
-			nav_items = Data2.subnets
-			rv.data = [{'text': str(x)} for x in nav_items]
-			rv.refresh_from_data()
-			
-			self.dismiss()
-		else:
-			print('no item selected')
-		
 		
 class TrackerLayout(BoxLayout):
 	text = StringProperty()
@@ -279,24 +214,82 @@ class TrackerLayout(BoxLayout):
 		
 		
 	def addSubnet(self):
-		addSubnet = addSubnetPop()
-		addSubnet.open()
+		app_ref = App.get_running_app()
+		_ids = app_ref.root.ids
+		self.ids.screen_manager.current = "addsubnetpop"
 
-		#closeButton.bind(on_press=popup.dismiss)   
+		
+	def addsubnetpop_close(self):
+		self.ids.screen_manager.current = "start_screen"
+		
+	def CreateSubnet(self):
+		new_network = self.ids.screen_manager.get_screen("addsubnetpop").ids.new_network.text
+		new_mask = self.ids.screen_manager.get_screen("addsubnetpop").ids.new_mask.text
+		new_name = self.ids.screen_manager.get_screen("addsubnetpop").ids.new_name.text
+		btn = self.ids.screen_manager.get_screen("addsubnetpop").ids.addbtn
+		_image = Image(source="loading.gif")
+		btn.add_widget(_image)
+		
+		Data = IPTrackerData()
+		data = (new_name,new_network,new_mask)
+		id = Data.create_subnet(data)
+		
+		ipdata = (id,new_network,new_mask)
+		t = Thread(target=self.createIps, args=( ipdata, ))
+		t.setDaemon(True) #set to exit with main thread
+		t.start()
+		self.ids.screen_manager.current = "start_screen"
+		
+		
+		#refresh nav list
+		Data2 = IPTrackerData()
+		global rv
+		rv.layout_manager.clear_selection()
+		nav_items = Data2.subnets
+		rv.data = [{'text': str(x)} for x in nav_items]
+		rv.refresh_from_data()
+		
+	def createIps(self, ipdata):
+		Data = IPTrackerData()
+		Data.create_ips(ipdata)
 		
 	def removeSubnet(self):
-		rpop = removeSubnetPop()
-
+		app_ref = App.get_running_app()
+		_ids = app_ref.root.ids
+		self.ids.screen_manager.current = "removesubnetpop"
+		
 		global _navindex
-		rpop._subname = str(self.ids.rv.data[_navindex]['text'])
+		_subname = self.ids.screen_manager.get_screen("start_screen").ids.rv.data[_navindex]['text']
+		self.ids.screen_manager.get_screen("removesubnetpop").ids.rmessage.text = "Are you sure you want to remove " +_subname +"? "
+		
+		
+	def removesubnetconf_dismiss(self):
+		app_ref = App.get_running_app()
+		_ids = app_ref.root.ids
+		self.ids.screen_manager.current = "start_screen"
+		
+	def removesubnetdata(self):
+		if '_subnetid' in globals():
+			global _subnetid
+			
+			#remove subnet form database
+			Data = IPTrackerData()
+			Data.remove_subnet(_subnetid)
+			
+			#refresh nav list
+			Data2 = IPTrackerData()
+			global rv
+			rv.layout_manager.clear_selection()
+			nav_items = Data2.subnets
+			rv.data = [{'text': str(x)} for x in nav_items]
+			rv.refresh_from_data()
+			
+			self.ids.screen_manager.current = "start_screen"
+			
+		else:
+			print('no item selected')
+			
 	
-		rpop.open()
-		#self.popNav()
-		Data = IPTrackerData()
-		nav_items = Data.subnets
-		self.rv.data = [{'text': str(x)} for x in nav_items]
-		
-		
 	def fping(self, address):
 		import os
 		import sys
@@ -358,9 +351,6 @@ class TrackerLayout(BoxLayout):
 			
 	def ipscan(self, _subnetid):
 		import socket 
-		
-		print("Scanning:"+str(_subnetid))
-		
 		self.repoprv()
 		
 		Data = IPTrackerData()
@@ -368,6 +358,8 @@ class TrackerLayout(BoxLayout):
 		_cnt = 0
 		for _ip in _ips:
 			print(str(_ip))
+			self.ids.scanstatus.text = "Scanning " + str(_ip[0])
+			
 			#ping ip for status
 			if self.fping(_ip[0]) == True:
 				_statdata = ("Alive",_ip[0],_subnetid)
