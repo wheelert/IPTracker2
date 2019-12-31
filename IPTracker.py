@@ -300,9 +300,9 @@ class TrackerLayout(BoxLayout):
 		if os.name == "nt":
 			startupinfo=subprocess.STARTUPINFO()
 			startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            
-		cmd = "ping -n 1 -w 3 "+address
-
+			cmd = "ping -n 1 -w 3 "+address
+		else:
+			cmd = ["/usr/bin/ping","-c","1","-W","3",address]
         
 		p = subprocess.Popen(cmd,
 							 stdout=subprocess.PIPE,
